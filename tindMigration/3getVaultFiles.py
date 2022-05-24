@@ -4,34 +4,35 @@ vaultfilenames = set(('Observer Front.JPG','IMAG0812.jpg','IMAG0760.jpg','DG_201
 cmsDirectory = "C:\\Users\\joconnor\\Desktop\\cmstorycopy"
 vaultDirectory = "C:\\Users\\joconnor\\Desktop\\tovault\\"
 
-
 def cutFiles():
+	global vaultfilenames
+	global cmsdirfiles
+	global vaultdirfiles
 	dups = 0
-	for root, dirs, files in os.walk(cmsDirectory):
-		for i in files:
-			if i in vaultfilenames:
-				try:
-					os.rename(os.path.join(root,i),vaultDirectory+i)
-					print("Moved " + i)
-				except FileExistsError:
-					cmsFileSize = os.path.getsize(os.path.join(root,i))
-					vaultFileSize = os.path.getsize(os.path.join(vaultDirectory,i))
-					if cmsFileSize > vaultFileSize:
-						os.remove(os.path.join(vaultDirectory,i))
-						os.rename(os.path.join(root,i),vaultDirectory+i)
-						dups = dups+1
-						print("Replaced " + i)
-					else:
-						continue
+	deleted = 0
 
-#					fname = i[:-4]
-#					fformat = i[len(i)-4:]
-#					os.rename(os.path.join(root,i),vaultDirectory+fname+"_dup"+str(dups)+fformat)
-#					print("Dup Moved and renamed" + i)
-#					dups = dups+1
-			else:
-				continue
+	for i in vaultfilenames:
+		for root, dirs, files in os.walk(cmsDirectory):
+			for f in files:
+				if f == i:
+					try:
+						os.rename(os.path.join(root,f),vaultDirectory+f)
+						print("Moved " + i)
+					except FileExistsError:
+						cmsFileSize = os.path.getsize(os.path.join(root,f))
+						vaultFileSize = os.path.getsize(os.path.join(vaultDirectory,f))
+						if cmsFileSize > vaultFileSize:
+							os.remove(os.path.join(vaultDirectory,f))
+							os.rename(os.path.join(root,f),vaultDirectory+f)
+							dups = dups+1
+							print("Replaced " + f)
+						else:
+							os.remove(os.path.join(root,f))
+							deleted = deleted + 1
+							print("Deleted " + f)
+				else:
+					continue
 
-	print("Replaced " + str(dups) + " total files")
+	print("Replaced " + str(dups) + " total files and deleted " + str(deleted) + " files that were smaller")
 
 cutFiles()
